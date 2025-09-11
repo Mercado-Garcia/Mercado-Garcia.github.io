@@ -28,18 +28,18 @@ jobs:
         run: dotnet publish src/EventInvitations.Blazor/EventInvitations.Blazor.csproj -c Release -o prerender/output --nologo
 
       # Setup latest Chrome for prerendering to avoid old Puppeteer Chromium
-      - name: Setup Chrome
-        id: chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
+      # - name: Setup Chrome
+      #  id: chrome
+      #  uses: browser-actions/setup-chrome@v1
+      #  with:
+      #    chrome-version: stable
 
       # Use NodeJS react-snap utility to prerender static website with modern Chrome
-      - name: Prerender Blazor client
-        working-directory: prerender
-        env:
-          PUPPETEER_EXECUTABLE_PATH: ${{ steps.chrome.outputs.chrome-path }}
-        run: npx react-snap
+      # - name: Prerender Blazor client
+      #  working-directory: prerender
+      #  env:
+      #    PUPPETEER_EXECUTABLE_PATH: ${{ steps.chrome.outputs.chrome-path }}
+      #  run: npx react-snap
 
       # Extract repo name from GITHUB_REPOSITORY environment variable
       - name: Extract repo name
