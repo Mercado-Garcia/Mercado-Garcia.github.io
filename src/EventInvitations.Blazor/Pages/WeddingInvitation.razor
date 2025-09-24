@@ -3,52 +3,55 @@
 @inject Library.Infrastructure.IWebsiteRepo WebsiteRepo
 @inject IJSRuntime JS
 
-<div class="hero" style="background-image:url('@(_wedding?.HeroBackgroundImage)');">
-    <canvas id="snow-canvas"></canvas>
-    <div class="hero-content">
-        <h1 class="couple">@(_wedding?.CoupleNames)</h1>
-        <p class="date">@(_wedding?.DateText)</p>
-        <p class="subtitle">@(_wedding?.Subtitle)</p>
+<MudPaper Elevation="0">
+    <div class="hero" style="@HeroStyle">
+        <canvas id="snow-canvas"></canvas>
+        <MudContainer Class="hero-content" MaxWidth="MaxWidth.False">
+            <MudText Typo="Typo.h1" Class="couple">@(_wedding?.CoupleNames)</MudText>
+            <MudText Typo="Typo.subtitle1" Class="date">@(_wedding?.DateText)</MudText>
+            <MudText Typo="Typo.subtitle2" Class="subtitle">@(_wedding?.Subtitle)</MudText>
+        </MudContainer>
+        <MudText Class="scroll-indicator">@(_wedding?.ScrollIndicatorText)</MudText>
     </div>
-    <div class="scroll-indicator">@(_wedding?.ScrollIndicatorText)</div>
-</div>
+</MudPaper>
 
 @foreach (var sec in _wedding?.Sections ?? new List<WeddingSection>())
 {
-    <section class="@(sec.AltStyle ? "fade-section alt" : "fade-section")">
-        <div class="@(sec.Reverse ? "section-inner reverse" : "section-inner")">
+    <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
+        <MudContainer Class="@(sec.Reverse ? "section-inner reverse" : "section-inner")" MaxWidth="MaxWidth.False">
             @if (sec.Reverse)
             {
                 <div class="section-text">
-                    <h2>@sec.Title</h2>
+                    <MudText Typo="Typo.h4">@sec.Title</MudText>
                     @foreach (var p in sec.Paragraphs ?? new List<string>())
                     {
-                        <p>@p</p>
+                        <MudText Typo="Typo.body1">@p</MudText>
                     }
                 </div>
-                <img src="@sec.Image" alt="@sec.ImageAlt" class="section-image" />
+                <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
             }
             else
             {
-                <img src="@sec.Image" alt="@sec.ImageAlt" class="section-image" />
+                <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
                 <div class="section-text">
-                    <h2>@sec.Title</h2>
+                    <MudText Typo="Typo.h4">@sec.Title</MudText>
                     @foreach (var p in sec.Paragraphs ?? new List<string>())
                     {
-                        <p>@p</p>
+                        <MudText Typo="Typo.body1">@p</MudText>
                     }
                 </div>
             }
-        </div>
-    </section>
+        </MudContainer>
+    </MudPaper>
 }
 
-<footer class="footer">
-    <p>@(_wedding?.FooterText)</p>
-</footer>
+<MudPaper Class="footer" Elevation="0">
+    <MudText Align="Align.Center">@(_wedding?.FooterText)</MudText>
+</MudPaper>
 
 @code {
     private PersonalPortfolio.Library.Domain.WeddingInvitation _wedding;
+    private string HeroStyle => string.IsNullOrWhiteSpace(_wedding?.HeroBackgroundImage) ? string.Empty : $"background-image:url('{_wedding.HeroBackgroundImage}');";
 
     protected override async Task OnInitializedAsync()
     {
