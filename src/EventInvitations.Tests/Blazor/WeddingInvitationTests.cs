@@ -11,7 +11,7 @@ using Xunit;
 
 namespace EventInvitations.Tests.Blazor;
 
-public class WeddingInvitationTests : TestContext
+public class WeddingInvitationTests : BunitContext
 {
     private static WebsiteData BuildWebsiteData(
         string? hero = "hero.jpg",
@@ -61,7 +61,7 @@ public class WeddingInvitationTests : TestContext
         RegisterCommonServices(data);
 
         // Act
-        var cut = RenderComponent<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
 
         // Assert
         cut.Find(".couple").TextContent.Should().Be("Alex & Rocío");
@@ -83,7 +83,7 @@ public class WeddingInvitationTests : TestContext
         RegisterCommonServices(data);
 
         // Act
-        var cut = RenderComponent<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
 
         // Assert
         var sections = cut.FindAll(".fade-section");
@@ -113,7 +113,7 @@ public class WeddingInvitationTests : TestContext
         RegisterCommonServices(data);
 
         // Act
-        var cut = RenderComponent<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
         cut.Render(); // trigger a subsequent render; OnAfterRenderAsync(firstRender=false)
 
         // Assert - allow async OnAfterRenderAsync to complete
@@ -131,7 +131,7 @@ public class WeddingInvitationTests : TestContext
         RegisterCommonServices(data);
 
         // Act
-        var cut = RenderComponent<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
 
         // Assert
         var hero = cut.Find(".hero");

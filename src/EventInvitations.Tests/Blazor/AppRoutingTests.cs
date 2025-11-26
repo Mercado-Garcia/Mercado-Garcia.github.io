@@ -10,7 +10,7 @@ using Xunit;
 
 namespace EventInvitations.Tests.Blazor;
 
-public class AppRoutingTests : TestContext
+public class AppRoutingTests : BunitContext
 {
     private void RegisterDependencies(WebsiteData website)
     {
@@ -32,7 +32,7 @@ public class AppRoutingTests : TestContext
         RegisterDependencies(website);
 
         // Act
-        var cut = RenderComponent<PersonalPortfolio.Blazor.App>();
+        var cut = Render<PersonalPortfolio.Blazor.App>();
 
         // Assert: Index page renders WeddingInvitation content
         cut.Find(".couple").TextContent.Should().Be("Alex & Rocío");
@@ -44,10 +44,10 @@ public class AppRoutingTests : TestContext
         // Arrange
         var website = new WebsiteData { WeddingInvitation = new WeddingInvitation { CoupleNames = "Alex & Rocío" } };
         RegisterDependencies(website);
-        var cut = RenderComponent<PersonalPortfolio.Blazor.App>();
+        var cut = Render<PersonalPortfolio.Blazor.App>();
 
         // Act
-        var nav = Services.GetRequiredService<NavigationManager>() as Bunit.TestDoubles.FakeNavigationManager;
+        var nav = Services.GetRequiredService<NavigationManager>();
         nav!.NavigateTo("http://localhost/this-does-not-exist");
         cut.Render();
 
