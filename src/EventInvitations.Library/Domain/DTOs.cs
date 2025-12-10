@@ -65,6 +65,11 @@ public class WeddingSection
     public string Title { get; set; }
     public string FooterText { get; set; }
     public List<string> Paragraphs { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public WeddingSectionType Type { get; set; } = WeddingSectionType.Standard;
+
+    public string CountdownTarget { get; set; }
 }
 
 #region Enums
@@ -73,6 +78,12 @@ public enum WebsiteTheme
 {
     Blue,
     Green
+}
+
+public enum WeddingSectionType
+{
+    Standard,
+    Countdown
 }
 
 public enum CardType

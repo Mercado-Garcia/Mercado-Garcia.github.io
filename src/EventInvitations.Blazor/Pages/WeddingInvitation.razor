@@ -1,5 +1,7 @@
 
 @using PersonalPortfolio.Library.Domain
+@using System.Linq
+@implements IDisposable
 @using PersonalPortfolio.Library.Domain.Mappers
 @inject Library.Infrastructure.IWebsiteRepo WebsiteRepo
 @inject IJSRuntime JS
@@ -24,34 +26,71 @@
 
 @foreach (var sec in _wedding?.Sections ?? new List<WeddingSection>())
 {
-    <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
-        <MudContainer Class="@(sec.Reverse ? "section-inner reverse" : "section-inner")" MaxWidth="MaxWidth.False">
-            @if (sec.Reverse)
-            {
-                <div class="section-text">
-                    <MudText Typo="Typo.h4">@sec.Title</MudText>
-                    @foreach (var p in sec.Paragraphs ?? new List<string>())
-                    {
-                        <MudText Typo="Typo.body1">@p</MudText>
-                    }
-                    <MudText Typo="Typo.body2" Class="footer-text">@(sec?.FooterText)</MudText>
+    if (sec.Type == WeddingSectionType.Countdown)
+    {
+        var parts = GetCountdownParts(sec);
+        <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
+            <MudContainer Class="countdown-section" MaxWidth="MaxWidth.False">
+                @if (string.IsNullOrWhiteSpace(sec.FooterText) is false)
+                {
+                    <MudText Typo="Typo.body2" Align="Align.Center" Class="countdown-footer">@sec.FooterText</MudText>
+                }
+                @if (string.IsNullOrWhiteSpace(sec.Title) is false)
+                {
+                    <MudText Typo="Typo.h4" Class="countdown-title">@sec.Title</MudText>
+                }
+                <div class="countdown-grid">
+                    <div class="countdown-box">
+                        <div class="countdown-number">@parts.Days</div>
+                        <div class="countdown-label">DAYS</div>
+                    </div>
+                    <div class="countdown-box">
+                        <div class="countdown-number">@parts.Hours.ToString("00")</div>
+                        <div class="countdown-label">HOURS</div>
+                    </div>
+                    <div class="countdown-box">
+                        <div class="countdown-number">@parts.Minutes.ToString("00")</div>
+                        <div class="countdown-label">MINS</div>
+                    </div>
+                    <div class="countdown-box">
+                        <div class="countdown-number">@parts.Seconds.ToString("00")</div>
+                        <div class="countdown-label">SECS</div>
+                    </div>
                 </div>
-                <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
-            }
-            else
-            {
-                <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
-                <div class="section-text">
-                    <MudText Typo="Typo.h4">@sec.Title</MudText>
-                    @foreach (var p in sec.Paragraphs ?? new List<string>())
-                    {
-                        <MudText Typo="Typo.body1">@p</MudText>
-                    }
-                    <MudText Typo="Typo.body2" Class="footer-text">@(sec?.FooterText)</MudText>
-                </div>
-            }
-        </MudContainer>
-    </MudPaper>
+            </MudContainer>
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
+            <MudContainer Class="@(sec.Reverse ? "section-inner reverse" : "section-inner")" MaxWidth="MaxWidth.False">
+                @if (sec.Reverse)
+                {
+                    <div class="section-text">
+                        <MudText Typo="Typo.h4">@sec.Title</MudText>
+                        @foreach (var p in sec.Paragraphs ?? new List<string>())
+                        {
+                            <MudText Typo="Typo.body1">@p</MudText>
+                        }
+                        <MudText Typo="Typo.body2" Class="footer-text">@(sec?.FooterText)</MudText>
+                    </div>
+                    <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
+                }
+                else
+                {
+                    <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
+                    <div class="section-text">
+                        <MudText Typo="Typo.h4">@sec.Title</MudText>
+                        @foreach (var p in sec.Paragraphs ?? new List<string>())
+                        {
+                            <MudText Typo="Typo.body1">@p</MudText>
+                        }
+                        <MudText Typo="Typo.body2" Class="footer-text">@(sec?.FooterText)</MudText>
+                    </div>
+                }
+            </MudContainer>
+        </MudPaper>
+    }
 }
 
 <MudPaper Class="footer" Elevation="0">
@@ -71,6 +110,7 @@
     private PersonalInformation _personalInformation;
     private PersonalPortfolio.Library.Domain.WeddingInvitation _wedding;
     private string HeroStyle => string.IsNullOrWhiteSpace(_wedding?.HeroBackgroundImage) ? string.Empty : $"background-image:url('{_wedding.HeroBackgroundImage}');";
+    private System.Timers.Timer _countdownTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -79,6 +119,15 @@
 
         var personalData = await WebsiteRepo.GetPersonalInformation();
         _personalInformation = personalData;
+
+        // If there is at least one countdown section, start a 1s timer to update the UI
+        if (_wedding?.Sections?.Any(s => s.Type == WeddingSectionType.Countdown) == true)
+        {
+            _countdownTimer = new System.Timers.Timer(1000);
+            _countdownTimer.Elapsed += (_, _) => InvokeAsync(StateHasChanged);
+            _countdownTimer.AutoReset = true;
+            _countdownTimer.Start();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -88,5 +137,36 @@
             await JS.InvokeVoidAsync("weddingSnow.init");
             await JS.InvokeVoidAsync("scrollFade.init");
         }
+    }
+
+    public record CountdownParts(int Days, int Hours, int Minutes, int Seconds);
+
+    private CountdownParts GetCountdownParts(WeddingSection sec)
+    {
+        if (sec is null) return new CountdownParts(0, 0, 0, 0);
+        var now = DateTimeOffset.Now;
+        if (DateTimeOffset.TryParse(sec.CountdownTarget, out var target) == false)
+        {
+            // Fallback to the wedding date text if provided and parseable
+            if (DateTimeOffset.TryParse(_wedding?.DateText, out var parsedFromText))
+                target = parsedFromText;
+            else
+                target = now;
+        }
+
+        if (target <= now) return new CountdownParts(0, 0, 0, 0);
+
+        var diff = target - now;
+        var days = (int)Math.Floor(diff.TotalDays);
+        var hours = diff.Hours;
+        var minutes = diff.Minutes;
+        var seconds = diff.Seconds;
+        return new CountdownParts(days, hours, minutes, seconds);
+    }
+
+    public void Dispose()
+    {
+        _countdownTimer?.Stop();
+        _countdownTimer?.Dispose();
     }
 }
