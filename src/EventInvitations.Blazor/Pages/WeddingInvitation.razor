@@ -101,6 +101,59 @@
             </MudContainer>
         </MudPaper>
     }
+    else if (sec.Type == WeddingSectionType.DressCode)
+    {
+        // Dress code section with a simple two-slide toggle (e.g., Mujeres / Hombres)
+        var slides = sec.DressSuggestions ?? new List<DressSuggestion>();
+        var current = (slides.Count > 0)
+            ? slides.ElementAtOrDefault(Math.Clamp(_dressIndex, 0, slides.Count - 1)) ?? slides[0]
+            : null;
+        <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
+            <MudContainer Class="dresscode-section" MaxWidth="MaxWidth.False">
+                @if (string.IsNullOrWhiteSpace(sec.Title) is false)
+                {
+                    <MudText Typo="Typo.h4" Class="dress-title">@sec.Title</MudText>
+                }
+                @if ((sec.Paragraphs?.Any() ?? false))
+                {
+                    <div class="dress-intro">
+                        @foreach (var p in sec.Paragraphs)
+                        {
+                            <MudText Typo="Typo.body1">@p</MudText>
+                        }
+                    </div>
+                }
+
+                @if (current is not null)
+                {
+                    <div class="dress-slide">
+                        @if (string.IsNullOrWhiteSpace(current.Image) is false)
+                        {
+                            <MudImage Src="@current.Image" Alt="@current.ImageAlt" Class="dress-image" />
+                        }
+                        <MudText Typo="Typo.h6" Class="dress-subtitle">@current.Title</MudText>
+                        @if (string.IsNullOrWhiteSpace(current.StyleLabel) is false || string.IsNullOrWhiteSpace(current.Description) is false)
+                        {
+                            <MudText Typo="Typo.body1" Class="dress-style">
+                                <b>@(string.IsNullOrWhiteSpace(current.StyleLabel) ? string.Empty : current.StyleLabel + " - ")</b>@current.Description
+                            </MudText>
+                        }
+                        @if (string.IsNullOrWhiteSpace(current.Note) is false)
+                        {
+                            <MudText Typo="Typo.body2" Class="dress-note">@current.Note</MudText>
+                        }
+                    </div>
+                    <div class="dress-dots">
+                        @for (var i = 0; i < slides.Count; i++)
+                        {
+                            var active = i == _dressIndex;
+                            <button type="button" class="dress-dot @(active ? "active" : string.Empty)" @onclick="(() => SetDressIndex(i))" aria-label="Cambiar a @(slides[i]?.Title)"></button>
+                        }
+                    </div>
+                }
+            </MudContainer>
+        </MudPaper>
+    }
     else
     {
         <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
@@ -152,6 +205,7 @@
     private PersonalPortfolio.Library.Domain.WeddingInvitation _wedding;
     private string HeroStyle => string.IsNullOrWhiteSpace(_wedding?.HeroBackgroundImage) ? string.Empty : $"background-image:url('{_wedding.HeroBackgroundImage}');";
     private System.Timers.Timer _countdownTimer;
+    private int _dressIndex = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -209,5 +263,10 @@
     {
         _countdownTimer?.Stop();
         _countdownTimer?.Dispose();
+    }
+
+    private void SetDressIndex(int index)
+    {
+        _dressIndex = index;
     }
 }

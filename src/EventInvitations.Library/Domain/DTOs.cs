@@ -72,6 +72,9 @@ public class WeddingSection
     public string CountdownTarget { get; set; }
 
     public List<WeddingEvent> Events { get; set; }
+
+    // For Dress Code section: slides with suggestions (e.g., Women / Men)
+    public List<DressSuggestion> DressSuggestions { get; set; }
 }
 
 public class WeddingEvent
@@ -86,6 +89,16 @@ public class WeddingEvent
     public string LocationLinkText { get; set; }
 }
 
+public class DressSuggestion
+{
+    public string Image { get; set; }
+    public string ImageAlt { get; set; }
+    public string Title { get; set; } // Mujeres / Hombres
+    public string StyleLabel { get; set; } // e.g., "Formal"
+    public string Description { get; set; }
+    public string Note { get; set; }
+}
+
 #region Enums
 
 public enum WebsiteTheme
@@ -98,7 +111,8 @@ public enum WeddingSectionType
 {
     Standard,
     Countdown,
-    Events
+    Events,
+    DressCode
 }
 
 public enum CardType
