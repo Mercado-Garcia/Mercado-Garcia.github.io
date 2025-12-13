@@ -146,8 +146,10 @@
                     <div class="dress-dots">
                         @for (var i = 0; i < slides.Count; i++)
                         {
-                            var active = i == _dressIndex;
-                            <button type="button" class="dress-dot @(active ? "active" : string.Empty)" @onclick="(() => SetDressIndex(i))" aria-label="Cambiar a @(slides[i]?.Title)"></button>
+                            // Capture loop variable to avoid closure issue where all handlers use the last value
+                            var idx = i;
+                            var active = idx == _dressIndex;
+                            <button type="button" class="dress-dot @(active ? "active" : string.Empty)" @onclick="(() => SetDressIndex(idx))" aria-label="Cambiar a @(slides[idx]?.Title)"></button>
                         }
                     </div>
                 }
