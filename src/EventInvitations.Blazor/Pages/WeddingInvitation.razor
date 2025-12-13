@@ -1,5 +1,6 @@
 
 @using PersonalPortfolio.Library.Domain
+@using Microsoft.JSInterop
 @using System.Linq
 @implements IDisposable
 @using PersonalPortfolio.Library.Domain.Mappers
@@ -126,31 +127,33 @@
 
                 @if (current is not null)
                 {
-                    <div class="dress-slide">
-                        @if (string.IsNullOrWhiteSpace(current.Image) is false)
-                        {
-                            <MudImage Src="@current.Image" Alt="@current.ImageAlt" Class="dress-image" />
-                        }
-                        <MudText Typo="Typo.h6" Class="dress-subtitle">@current.Title</MudText>
-                        @if (string.IsNullOrWhiteSpace(current.StyleLabel) is false || string.IsNullOrWhiteSpace(current.Description) is false)
-                        {
-                            <MudText Typo="Typo.body1" Class="dress-style">
-                                <b>@(string.IsNullOrWhiteSpace(current.StyleLabel) ? string.Empty : current.StyleLabel + " - ")</b>@current.Description
-                            </MudText>
-                        }
-                        @if (string.IsNullOrWhiteSpace(current.Note) is false)
-                        {
-                            <MudText Typo="Typo.body2" Class="dress-note">@current.Note</MudText>
-                        }
-                    </div>
-                    <div class="dress-dots">
-                        @for (var i = 0; i < slides.Count; i++)
-                        {
-                            // Capture loop variable to avoid closure issue where all handlers use the last value
-                            var idx = i;
-                            var active = idx == _dressIndex;
-                            <button type="button" class="dress-dot @(active ? "active" : string.Empty)" @onclick="(() => SetDressIndex(idx))" aria-label="Cambiar a @(slides[idx]?.Title)"></button>
-                        }
+                    <div class="dresscode-touch" @ref="_dressContainer">
+                        <div class="dress-slide">
+                            @if (string.IsNullOrWhiteSpace(current.Image) is false)
+                            {
+                                <MudImage Src="@current.Image" Alt="@current.ImageAlt" Class="dress-image" />
+                            }
+                            <MudText Typo="Typo.h6" Class="dress-subtitle">@current.Title</MudText>
+                            @if (string.IsNullOrWhiteSpace(current.StyleLabel) is false || string.IsNullOrWhiteSpace(current.Description) is false)
+                            {
+                                <MudText Typo="Typo.body1" Class="dress-style">
+                                    <b>@(string.IsNullOrWhiteSpace(current.StyleLabel) ? string.Empty : current.StyleLabel + " - ")</b>@current.Description
+                                </MudText>
+                            }
+                            @if (string.IsNullOrWhiteSpace(current.Note) is false)
+                            {
+                                <MudText Typo="Typo.body2" Class="dress-note">@current.Note</MudText>
+                            }
+                        </div>
+                        <div class="dress-dots">
+                            @for (var i = 0; i < slides.Count; i++)
+                            {
+                                // Capture loop variable to avoid closure issue where all handlers use the last value
+                                var idx = i;
+                                var active = idx == _dressIndex;
+                                <button type="button" class="dress-dot @(active ? "active" : string.Empty)" @onclick="(() => SetDressIndex(idx))" aria-label="Cambiar a @(slides[idx]?.Title)"></button>
+                            }
+                        </div>
                     </div>
                 }
             </MudContainer>
@@ -208,6 +211,8 @@
     private string HeroStyle => string.IsNullOrWhiteSpace(_wedding?.HeroBackgroundImage) ? string.Empty : $"background-image:url('{_wedding.HeroBackgroundImage}');";
     private System.Timers.Timer _countdownTimer;
     private int _dressIndex = 0;
+    private ElementReference _dressContainer;
+    private DotNetObjectReference<object> _dotNetRef;
 
     protected override async Task OnInitializedAsync()
     {
@@ -233,6 +238,12 @@
         {
             await JS.InvokeVoidAsync("weddingSnow.init");
             await JS.InvokeVoidAsync("scrollFade.init");
+            _dotNetRef = DotNetObjectReference.Create<object>(this);
+            try
+            {
+                await JS.InvokeVoidAsync("dressSwipe.init", _dressContainer, _dotNetRef);
+            }
+            catch { /* no-op if element not found */ }
         }
     }
 
@@ -265,10 +276,44 @@
     {
         _countdownTimer?.Stop();
         _countdownTimer?.Dispose();
+        try
+        {
+            JS?.InvokeVoidAsync("dressSwipe.dispose", _dressContainer);
+        }
+        catch { /* ignore dispose JS errors */ }
+        _dotNetRef?.Dispose();
     }
 
     private void SetDressIndex(int index)
     {
-        _dressIndex = index;
+        var total = _wedding?.Sections?.FirstOrDefault(s => s.Type == WeddingSectionType.DressCode)?.DressSuggestions?.Count ?? 0;
+        if (total <= 0) return;
+        _dressIndex = Math.Clamp(index, 0, total - 1);
+    }
+
+    private void NextDress()
+    {
+        var total = _wedding?.Sections?.FirstOrDefault(s => s.Type == WeddingSectionType.DressCode)?.DressSuggestions?.Count ?? 0;
+        if (total <= 0) return;
+        _dressIndex = (_dressIndex + 1) % total;
+        StateHasChanged();
+    }
+
+    private void PrevDress()
+    {
+        var total = _wedding?.Sections?.FirstOrDefault(s => s.Type == WeddingSectionType.DressCode)?.DressSuggestions?.Count ?? 0;
+        if (total <= 0) return;
+        _dressIndex = (_dressIndex - 1 + total) % total;
+        StateHasChanged();
+    }
+
+    [Microsoft.JSInterop.JSInvokable]
+    public Task OnDressSwipe(string direction)
+    {
+        if (string.Equals(direction, "left", StringComparison.OrdinalIgnoreCase))
+            NextDress();
+        else if (string.Equals(direction, "right", StringComparison.OrdinalIgnoreCase))
+            PrevDress();
+        return Task.CompletedTask;
     }
 }
