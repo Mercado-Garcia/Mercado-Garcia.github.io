@@ -77,7 +77,7 @@
                         <div class="event-item">
                             @if (string.IsNullOrWhiteSpace(ev.Image) is false)
                             {
-                                <MudImage Src="@ev.Image" Alt="@ev.ImageAlt" Class="event-image" />
+                                <MudImage Src="@ev.Image" Alt="@ev.ImageAlt" Class="event-image" loading="lazy" />
                             }
                             <div class="event-details">
                                 <MudText Typo="Typo.h6" Class="event-title">@ev.Title</MudText>
@@ -133,7 +133,7 @@
                         <div class="dress-slide">
                             @if (string.IsNullOrWhiteSpace(current.Image) is false)
                             {
-                                <MudImage Src="@current.Image" Alt="@current.ImageAlt" Class="dress-image" />
+                                <MudImage Src="@current.Image" Alt="@current.ImageAlt" Class="dress-image" loading="lazy" />
                             }
                             <MudText Typo="Typo.h6" Class="dress-subtitle">@current.Title</MudText>
                             @if (string.IsNullOrWhiteSpace(current.StyleLabel) is false || string.IsNullOrWhiteSpace(current.Description) is false)
@@ -175,11 +175,11 @@
                         }
                         <MudText Typo="Typo.body2" Class="footer-text">@(sec?.FooterText)</MudText>
                     </div>
-                    <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
+                    <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" loading="lazy" />
                 }
                 else
                 {
-                    <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" />
+                    <MudImage Src="@sec.Image" Alt="@sec.ImageAlt" Class="section-image" loading="lazy" />
                     <div class="section-text">
                         <MudText Typo="Typo.h4">@sec.Title</MudText>
                         @foreach (var p in sec.Paragraphs ?? new List<string>())
@@ -231,13 +231,6 @@
                         <textarea id="message" rows="6" placeholder="Tu mensaje" @bind="_rsvp.Message"></textarea>
                     </div>
 
-                    @if (CaptchaEnabled)
-                    {
-                        <div class="form-field full">
-                            <!-- Google reCAPTCHA v2 widget -->
-                            <div class="g-recaptcha" data-sitekey="@RecaptchaSiteKey"></div>
-                        </div>
-                    }
 
                     <div class="rsvp-actions full">
                         <button type="submit" class="mud-button mud-button-filled mud-button-filled-primary" disabled="@_submitting">
@@ -272,8 +265,6 @@
     private PersonalInformation _personalInformation;
     private Library.Domain.WeddingInvitation _wedding;
     private const string FormspreeEndpoint = "https://formspree.io/f/meoybpvz";
-    private string RecaptchaSiteKey = string.Empty;
-    private bool CaptchaEnabled => string.IsNullOrWhiteSpace(RecaptchaSiteKey) == false;
     private string HeroStyle => string.IsNullOrWhiteSpace(_wedding?.HeroBackgroundImage) ? string.Empty : $"background-image:url('{_wedding.HeroBackgroundImage}');";
     private IReadOnlyDictionary<string, object> HeroAttributes =>
         string.IsNullOrWhiteSpace(_wedding?.HeroBackgroundImage)
@@ -318,27 +309,6 @@
                 await JS.InvokeVoidAsync("dressSwipe.init", _dressContainer, _dotNetRef);
             }
             catch { /* no-op if element not found */ }
-            // Detect reCAPTCHA site key and render widget
-            try
-            {
-                RecaptchaSiteKey = await JS.InvokeAsync<string>("rsvpForm.getRecaptchaSiteKey");
-                if (string.IsNullOrWhiteSpace(RecaptchaSiteKey) == false)
-                {
-                    await JS.InvokeVoidAsync("rsvpForm.renderRecaptcha");
-                    StateHasChanged();
-                }
-            }
-            catch { /* ignore if not configured */ }
-        }
-
-        // Attempt to render captcha on every render while enabled to cover script/DOM races.
-        if (CaptchaEnabled)
-        {
-            try
-            {
-                await JS.InvokeVoidAsync("rsvpForm.renderRecaptcha");
-            }
-            catch { /* no-op */ }
         }
     }
 
@@ -438,23 +408,6 @@
                 return;
             }
 
-            string captchaToken = null;
-            if (CaptchaEnabled)
-            {
-                try
-                {
-                    captchaToken = await JS.InvokeAsync<string>("rsvpForm.getRecaptchaToken");
-                }
-                catch { /* ignore */ }
-
-                if (string.IsNullOrWhiteSpace(captchaToken))
-                {
-                    _submitMessage = "Por favor, completa el captcha.";
-                    _submitSuccess = false;
-                    return;
-                }
-            }
-
             var payload = new Dictionary<string, object>
             {
                 ["name"] = _rsvp.Name ?? string.Empty,
@@ -463,11 +416,6 @@
                 ["email"] = _rsvp.Email,
                 ["message"] = _rsvp.Message ?? string.Empty
             };
-
-            if (CaptchaEnabled && string.IsNullOrWhiteSpace(captchaToken) is false)
-            {
-                payload["g-recaptcha-response"] = captchaToken;
-            }
 
             var req = new HttpRequestMessage(HttpMethod.Post, FormspreeEndpoint)
             {
@@ -481,11 +429,6 @@
                 _submitSuccess = true;
                 _submitMessage = "¡Gracias! Tu respuesta ha sido enviada.";
                 _rsvp = new RsvpModel();
-                if (CaptchaEnabled)
-                {
-                    try { await JS.InvokeVoidAsync("rsvpForm.resetRecaptcha"); } catch { /* ignore */ }
-                }
-
             }
             else
             {
@@ -514,5 +457,4 @@
         public string Message { get; set; }
     }
 
-    // CaptchaProvider removed – site uses only Google reCAPTCHA v2
 }
