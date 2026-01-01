@@ -303,6 +303,7 @@
         {
             await JS.InvokeVoidAsync("weddingSnow.init");
             await JS.InvokeVoidAsync("scrollFade.init");
+            await JS.InvokeVoidAsync("backgroundMusic.init", "music/wedding-background-music.mp3");
             _dotNetRef = DotNetObjectReference.Create<object>(this);
             try
             {

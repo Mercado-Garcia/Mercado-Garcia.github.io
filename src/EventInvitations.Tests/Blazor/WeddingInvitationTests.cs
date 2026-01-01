@@ -49,8 +49,9 @@ public class WeddingInvitationTests : BunitContext
         Services.AddSingleton(repo.Object);
 
         // JSInterop expectations for OnAfterRenderAsync
-        JSInterop.SetupVoid("weddingSnow.init");
-        JSInterop.SetupVoid("scrollFade.init");
+        JSInterop.SetupVoid("weddingSnow.init").SetVoidResult();
+        JSInterop.SetupVoid("scrollFade.init").SetVoidResult();
+        JSInterop.SetupVoid("backgroundMusic.init", "music/wedding-background-music.mp3").SetVoidResult();
     }
 
     [Fact]
@@ -120,6 +121,7 @@ public class WeddingInvitationTests : BunitContext
         cut.WaitForAssertion(() =>
         {
             JSInterop.Invocations.Count(i => i.Identifier == "weddingSnow.init").Should().Be(1);
+            JSInterop.Invocations.Count(i => i.Identifier == "backgroundMusic.init").Should().Be(1);
         }, timeout: System.TimeSpan.FromSeconds(2));
     }
 
