@@ -11,7 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		prerender\package.json = prerender\package.json
 		README.md = README.md
-		.github\workflows\deploy-blazor-wasm-to-github-pages.yml = .github\workflows\deploy-blazor-wasm-to-github-pages.yml
+		.github\workflows\dotnet-cd.yml = .github\workflows\dotnet-cd.yml
+		.github\workflows\dotnet-ci.yml = .github\workflows\dotnet-ci.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventInvitations.Tests", "src\EventInvitations.Tests\EventInvitations.Tests.csproj", "{0D36F7E0-9C2D-4C39-A9F0-7629BFA59F50}"
