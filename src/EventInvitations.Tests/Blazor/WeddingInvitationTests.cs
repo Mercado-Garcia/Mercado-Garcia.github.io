@@ -189,4 +189,75 @@ public class WeddingInvitationTests : BunitContext
         var dressNote = cut.Find(".dress-note");
         dressNote.TextContent.Should().Be("Favor de reservar colores blanco, rosa y fucsia.");
     }
+
+    [Fact]
+    public void Renders_Photos_Section_With_Action_Button()
+    {
+        // Arrange
+        var data = BuildWebsiteData();
+        data.WeddingInvitation.Sections.Add(new WeddingSection
+        {
+            Type = WeddingSectionType.Photos,
+            Title = "Fotos",
+            ActionUrl = "https://photos.amazon.com/xyz",
+            ActionText = "Subir Fotos"
+        });
+        RegisterCommonServices(data);
+
+        // Act
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+
+        // Assert
+        var actionButton = cut.Find(".action-container a");
+        actionButton.GetAttribute("href").Should().Be("https://photos.amazon.com/xyz");
+        actionButton.TextContent.Should().Contain("Subir Fotos");
+        actionButton.GetAttribute("target").Should().Be("_blank");
+    }
+
+    [Fact]
+    public void Renders_Photos_Section_With_Animated_Camera_And_QR_Code()
+    {
+        // Arrange
+        var data = BuildWebsiteData();
+        data.WeddingInvitation.Sections.Add(new WeddingSection
+        {
+            Type = WeddingSectionType.Photos,
+            Title = "Fotos",
+            ActionUrl = "https://photos.amazon.com/xyz"
+        });
+        RegisterCommonServices(data);
+
+        // Act
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+
+        // Assert
+        cut.Find(".camera-container").Should().NotBeNull();
+        cut.Find(".camera-svg").Should().NotBeNull();
+        cut.Find(".camera-path").Should().NotBeNull();
+
+        var qrCodeImage = cut.Find(".qr-code-image");
+        qrCodeImage.GetAttribute("src").Should().Contain("api.qrserver.com");
+        qrCodeImage.GetAttribute("src").Should().Contain("https%3A%2F%2Fphotos.amazon.com%2Fxyz");
+    }
+
+    [Fact]
+    public void Does_Not_Render_QR_Code_When_Disabled()
+    {
+        // Arrange
+        var data = BuildWebsiteData();
+        data.WeddingInvitation.Sections.Add(new WeddingSection
+        {
+            Type = WeddingSectionType.Photos,
+            Title = "Fotos",
+            ActionUrl = "https://photos.amazon.com/xyz",
+            ShowQrCode = false
+        });
+        RegisterCommonServices(data);
+
+        // Act
+        var cut = Render<PersonalPortfolio.Blazor.Pages.WeddingInvitation>();
+
+        // Assert
+        cut.FindAll(".qr-code-image").Should().BeEmpty();
+    }
 }

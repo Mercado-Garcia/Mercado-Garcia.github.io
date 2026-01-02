@@ -190,6 +190,61 @@
             </MudContainer>
         </MudPaper>
     }
+    else if (sec.Type == WeddingSectionType.Photos)
+    {
+        <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">
+            <MudContainer Class="photos-section-container" MaxWidth="MaxWidth.False">
+                <div class="section-text centered">
+                    @if (string.IsNullOrWhiteSpace(sec.Title) is false)
+                    {
+                        <MudText Typo="Typo.h4" Align="Align.Center">@sec.Title</MudText>
+                    }
+                    @if (sec.Paragraphs?.Count > 0)
+                    {
+                        <MudText Typo="Typo.body1" Align="Align.Center">@sec.Paragraphs[0]</MudText>
+                    }
+                </div>
+
+                <div class="camera-container">
+                    <svg class="camera-svg" viewBox="0 0 200 160" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Camera Body & Lens -->
+                        <path class="camera-path" d="M40,60 Q40,50 50,50 H70 L80,30 H120 L130,50 H150 Q160,50 160,60 V120 Q160,130 150,130 H50 Q40,130 40,120 Z M70,90 A30,30 0 1,0 130,90 A30,30 0 1,0 70,90" />
+                    </svg>
+                    @if (sec.ShowQrCode)
+                    {
+                        <div class="qr-code-wrapper">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@(Uri.EscapeDataString(sec.ActionUrl ?? ""))" alt="QR Code" class="qr-code-image" />
+                        </div>
+                    }
+                </div>
+
+                <div class="section-text centered">
+                    @if (sec.Paragraphs?.Count > 1)
+                    {
+                        @foreach (var p in sec.Paragraphs.Skip(1))
+                        {
+                            <MudText Typo="Typo.body1" Align="Align.Center">@p</MudText>
+                        }
+                    }
+
+                    @if (string.IsNullOrWhiteSpace(sec.ActionUrl) is false)
+                    {
+                        <div class="action-container" style="margin-top: 1.5rem; display: flex; justify-content: center;">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Href="@sec.ActionUrl"
+                                       Target="_blank"
+                                       StartIcon="@Icons.Material.Filled.PhotoCamera"
+                                       Style="border-radius: 50px; padding: 10px 30px; font-weight: 600;">
+                                @(string.IsNullOrWhiteSpace(sec.ActionText) ? "Subir fotos" : sec.ActionText)
+                            </MudButton>
+                        </div>
+                    }
+                    <MudText Typo="Typo.body2" Class="footer-text" Align="Align.Center">@(sec?.FooterText)</MudText>
+                </div>
+            </MudContainer>
+        </MudPaper>
+    }
     else
     {
         <MudPaper Class="@(sec.AltStyle ? "fade-section alt" : "fade-section")" Elevation="0">

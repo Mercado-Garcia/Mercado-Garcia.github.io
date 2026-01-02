@@ -75,6 +75,10 @@ public class WeddingSection
 
     // For Dress Code section: slides with suggestions (e.g., Women / Men)
     public List<DressSuggestion> DressSuggestions { get; set; }
+
+    public string ActionUrl { get; set; }
+    public string ActionText { get; set; }
+    public bool ShowQrCode { get; set; } = true;
 }
 
 public class WeddingEvent
@@ -113,7 +117,8 @@ public enum WeddingSectionType
     Countdown,
     Events,
     DressCode,
-    Gifts
+    Gifts,
+    Photos
 }
 
 public enum CardType
