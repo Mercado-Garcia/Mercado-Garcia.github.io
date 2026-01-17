@@ -109,7 +109,8 @@ public class DressSuggestion
 public enum WebsiteTheme
 {
     Blue,
-    Green
+    Green,
+    GreenCyan
 }
 
 public enum WeddingSectionType

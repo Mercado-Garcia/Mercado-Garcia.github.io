@@ -19,6 +19,7 @@ public static class ThemeManager
                         AppbarBackground = "#0097FF",
                         AppbarText = "#FFFFFF",
                         Primary = "#007CD1",
+                        PrimaryContrastText = "#FFFFFF",
                         TextPrimary = "#0C1217",
                         Background = "#F4FDFF",
                         TextSecondary = "#0C1217",
@@ -35,6 +36,7 @@ public static class ThemeManager
                         AppbarBackground = "#0097FF",
                         AppbarText = "#FFFFFF",
                         Primary = "#007CD1",
+                        PrimaryContrastText = "#FFFFFF",
                         Secondary = "#000000",
                         TextPrimary = "#FFFFFF",
                         Background = "#001524",
@@ -64,6 +66,38 @@ public static class ThemeManager
                     {
                         Primary =  new MudColor("#00D100"),
                         //Secondary =  new MudColor("#000000"
+                    }
+                };
+                break;
+
+            case WebsiteTheme.GreenCyan:
+                theme = new MudTheme
+                {
+                    PaletteLight = new PaletteLight
+                    {
+                        Primary = "#78B7AD",
+                        PrimaryContrastText = "#FFFFFF",
+                        Secondary = "#5C9087",
+                        AppbarBackground = "#78B7AD",
+                        Background = "#FAFEFD",
+                        Surface = "#FFFFFF",
+                        DrawerBackground = "#FFFFFF",
+                        TextPrimary = "#2F3B37",
+                        TextSecondary = "#5C6B66",
+                        ActionDefault = "#78B7AD",
+                    },
+                    PaletteDark = new PaletteDark
+                    {
+                        Primary = "#8AC7BD",
+                        PrimaryContrastText = "#1A201E",
+                        Secondary = "#78B7AD",
+                        AppbarBackground = "#1A201E",
+                        Background = "#121212",
+                        Surface = "#1E1E1E",
+                        DrawerBackground = "#1E1E1E",
+                        TextPrimary = "#E0E0E0",
+                        TextSecondary = "#B0B0B0",
+                        ActionDefault = "#8AC7BD",
                     }
                 };
                 break;
