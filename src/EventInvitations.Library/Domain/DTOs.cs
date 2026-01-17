@@ -50,6 +50,7 @@ public class WeddingInvitation
     public string HeroBackgroundImage { get; set; }
     public string CoupleNames { get; set; }
     public string DateText { get; set; }
+    public string ReservationDate { get; set; }
     public string Subtitle { get; set; }
     public string ScrollIndicatorText { get; set; }
     public List<WeddingSection> Sections { get; set; }

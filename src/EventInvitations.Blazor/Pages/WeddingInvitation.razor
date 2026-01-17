@@ -283,9 +283,9 @@
     <MudContainer Class="section-inner" MaxWidth="MaxWidth.False">
         <div class="section-text">
             <div class="rsvp-title">Confirma tu asistencia</div>
-            @if (string.IsNullOrWhiteSpace(_wedding?.DateText) is false)
+            @if (string.IsNullOrWhiteSpace(_wedding?.ReservationDate) is false)
             {
-                <div class="rsvp-subtitle">Por favor, reserva antes de @_wedding.DateText.</div>
+                <div class="rsvp-subtitle">Por favor, reserva antes de @_wedding.ReservationDate.</div>
             }
 
             <EditForm Model="_rsvp" OnValidSubmit="SubmitRsvpAsync">
